@@ -5,9 +5,14 @@ import { z } from "zod"
 import bcrypt from "bcrypt"
 import { validateRequest } from "zod-express-middleware";
 import { encryptPassword } from "../auth-utils";
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv"
 
 
 const authController = Router();
+
+ dotenv.config()
+
 
 
 
@@ -43,16 +48,17 @@ authController.post("/signIn",
 				name,
 				email,
 				passwordHashed,
+
 			}
 		})
 
-		res.status(201).send("User created")
+		res.status(201).send(newUser)
 
 
 
 	})
 
-authController.get("/login",
+authController.post("/login",
 	validateRequest({
 		body: z.object({
 			email: z.string().email(),
@@ -61,27 +67,30 @@ authController.get("/login",
 	}),
 	async (req, res) => {
 		const { email, password } = req.body;
-		const userHashedPassword = await prisma.user.findFirst({
+		const user = await prisma.user.findFirst({
 			where: {
 				email
-			},
-			select: {
-				passwordHashed: true
 			}
-		}).then(result => result?.passwordHashed)
+		})
 
-		if (!userHashedPassword) {
+		if (!user) {
 			return res.status(405).send("Email doesn't exist")
 		}
 
-		const isPasswordsMatched = bcrypt.compareSync(password, userHashedPassword);
+		const isPasswordsMatched = bcrypt.compareSync(password, user.passwordHashed);
 
 		if (!isPasswordsMatched) {
 			res.status(401).send("Password is wrong")
 		}
 
-		res.status(200).send("You did it so far")
+		const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET_KEY!)
+
+		res.status(200).json({ token, user })
 
 	})
 
 export { authController }
+
+// after checking password generating jwt , experitation 1 hour,
+// token version
+// save in cookies
