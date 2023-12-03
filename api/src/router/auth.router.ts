@@ -11,12 +11,9 @@ import dotenv from "dotenv"
 
 const authController = Router();
 
- dotenv.config()
+dotenv.config()
 
-
-
-
-authController.post("/signIn",
+authController.post("/register",
 	validateRequest({
 		body: z.object({
 			name: z.string(),
@@ -88,6 +85,10 @@ authController.post("/login",
 		res.status(200).json({ token, user })
 
 	})
+
+authController.post("logout", async (req, res) => {
+
+})
 
 export { authController }
 
