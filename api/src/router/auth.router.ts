@@ -23,7 +23,7 @@ authController.post("/register",
 		})
 	}),
 	async (req, res) => {
-		const { name, email, password } = req.body;
+  		const { name, email, password } = req.body;
 
 		const isUser = await prisma.user.findFirst({
 			where: {
@@ -31,11 +31,10 @@ authController.post("/register",
 			}
 		})
 
-		// console.log(email)
-
+ 
 
 		if (isUser) {
-			return res.status(405).json({ message: "This email is already signed" })
+			return res.status(405).json("This email is already signed")
 		}
 
 		const passwordHashed = encryptPassword(password)
@@ -54,7 +53,7 @@ authController.post("/register",
 
 
 	})
-
+// 
 authController.post("/login",
 	validateRequest({
 		body: z.object({
