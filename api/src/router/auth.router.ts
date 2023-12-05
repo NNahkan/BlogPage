@@ -23,7 +23,7 @@ authController.post("/register",
 		})
 	}),
 	async (req, res) => {
-  		const { name, email, password } = req.body;
+		const { name, email, password } = req.body;
 
 		const isUser = await prisma.user.findFirst({
 			where: {
@@ -31,7 +31,7 @@ authController.post("/register",
 			}
 		})
 
- 
+
 
 		if (isUser) {
 			return res.status(405).json("This email is already signed")
@@ -62,6 +62,7 @@ authController.post("/login",
 		})
 	}),
 	async (req, res) => {
+		console.log("login")
 		const { email, password } = req.body;
 		const user = await prisma.user.findFirst({
 			where: {
@@ -76,12 +77,23 @@ authController.post("/login",
 		const isPasswordsMatched = bcrypt.compareSync(password, user.passwordHashed);
 
 		if (!isPasswordsMatched) {
-			res.status(401).send("Password is wrong")
+			return res.status(401).json("Password is wrong")
 		}
 
 		const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET_KEY!)
+		const { passwordHashed, ...rest } = user
 
-		res.status(200).json({ token, user })
+		// res.cookie('name', 'geeksforgeeks');
+		// res.send("Cookie Set");
+
+
+		res.cookie("access_token", token, {
+			httpOnly: true
+		}).status(200).json(rest)
+
+		console.log(rest)
+
+
 
 	})
 

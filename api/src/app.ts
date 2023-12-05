@@ -4,17 +4,20 @@ import { userController } from "./router/user.router";
 import { authController } from "./router/auth.router";
 import dotenv from "dotenv";
 import { postController } from "./router/post.router";
-import cors from "cors" 
-  
+import cors from "cors"
+import cookieParser from "cookie-parser"
+
+
 const prisma = new PrismaClient()
- 
+
 const app = express()
 app.use(express.json())
-app.use(cors()) 
 
-// app.get("/",(req,res) => {
-// 	console.log("You did it broo")
-// })
+app.use(cors({
+	origin: "http://localhost:3001/",
+	credentials: true,
+}));
+app.use(cookieParser())
 
 app.use("/auth", authController)
 app.use("/posts", postController)
