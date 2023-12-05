@@ -83,10 +83,6 @@ authController.post("/login",
 		const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET_KEY!)
 		const { passwordHashed, ...rest } = user
 
-		// res.cookie('name', 'geeksforgeeks');
-		// res.send("Cookie Set");
-
-
 		res.cookie("access_token", token, {
 			httpOnly: true
 		}).status(200).json(rest)
@@ -102,7 +98,4 @@ authController.post("logout", async (req, res) => {
 })
 
 export { authController }
-
-// after checking password generating jwt , experitation 1 hour,
-// token version
-// save in cookies
+ 
