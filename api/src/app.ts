@@ -2,7 +2,6 @@ import { PrismaClient } from "@prisma/client";
 import express from "express"
 import { userController } from "./router/user.router";
 import { authController } from "./router/auth.router";
-import dotenv from "dotenv";
 import { postController } from "./router/post.router";
 import cors from "cors"
 import cookieParser from "cookie-parser"
@@ -14,7 +13,8 @@ const app = express()
 app.use(express.json())
 
 app.use(cors({
-	origin: "http://127.0.0.1:5173/",
+	origin: ['http://127.0.0.1:5173', 'http://localhost:5173'],
+	allowedHeaders: ['Content-Type', 'Authorization'],
 	credentials: true
 }));
 app.use(cookieParser())

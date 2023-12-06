@@ -18,7 +18,7 @@ authController.post("/register",
 		body: z.object({
 			name: z.string(),
 			email: z.string().email(),
-			password: z.string().min(8),
+			password: z.string(),
 
 		})
 	}),
@@ -62,7 +62,6 @@ authController.post("/login",
 		})
 	}),
 	async (req, res) => {
-		console.log("login")
 		const { email, password } = req.body;
 		const user = await prisma.user.findFirst({
 			where: {
@@ -71,7 +70,7 @@ authController.post("/login",
 		})
 
 		if (!user) {
-			return res.status(405).send("Email doesn't exist")
+			return res.status(405).json("Email doesn't exist")
 		}
 
 		const isPasswordsMatched = bcrypt.compareSync(password, user.passwordHashed);
@@ -82,20 +81,31 @@ authController.post("/login",
 
 		const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET_KEY!)
 		const { passwordHashed, ...rest } = user
+		console.log(req.cookies)
 
 		res.cookie("access_token", token, {
-			httpOnly: true
+			httpOnly: true,
+			sameSite: "lax",
+			secure: false,
+			path: "/",
+			domain: 'localhost'
 		}).status(200).json(rest)
 
-		console.log(rest)
+		console.log(req.cookies)
 
 
 
 	})
 
-authController.post("logout", async (req, res) => {
+authController.post("/logout", async (req, res) => {
+	console.log(req.signedCookies)
+	console.log(req.cookies)
+	res.clearCookie("access_token", {
+		httpOnly: true,
+		sameSite: "none",
+		secure: true
+	}).status(200).json("User has been logout")
 
 })
 
 export { authController }
- 
