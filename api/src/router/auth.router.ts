@@ -85,8 +85,8 @@ authController.post("/login",
 
 		res.cookie("access_token", token, {
 			httpOnly: true,
-			sameSite: "lax",
-			secure: false,
+			sameSite: "none",
+			secure: true,
 			path: "/",
 			domain: 'localhost'
 		}).status(200).json(rest)
@@ -101,9 +101,12 @@ authController.post("/logout", async (req, res) => {
 	console.log(req.signedCookies)
 	console.log(req.cookies)
 	res.clearCookie("access_token", {
-		httpOnly: true,
+		// httpOnly: true,
 		sameSite: "none",
-		secure: true
+		secure: true,
+		// domain: 'localhost'
+
+
 	}).status(200).json("User has been logout")
 
 })
