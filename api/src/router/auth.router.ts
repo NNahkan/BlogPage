@@ -81,7 +81,6 @@ authController.post("/login",
 
 		const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET_KEY!)
 		const { passwordHashed, ...rest } = user
-		console.log(req.cookies)
 
 		res.cookie("access_token", token, {
 			httpOnly: true,
@@ -91,20 +90,16 @@ authController.post("/login",
 			domain: 'localhost'
 		}).status(200).json(rest)
 
-		console.log(req.cookies)
 
 
 
 	})
 
-authController.post("/logout", async (req, res) => {
-	console.log(req.signedCookies)
-	console.log(req.cookies)
+authController.delete("/logout", async (req, res) => {
+
 	res.clearCookie("access_token", {
-		// httpOnly: true,
 		sameSite: "none",
 		secure: true,
-		// domain: 'localhost'
 
 
 	}).status(200).json("User has been logout")
