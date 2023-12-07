@@ -38,15 +38,29 @@ postController.get("/:id", async (req, res) => {
 					name: true,
 					image: true
 				}
+			},
+			categories: {
+				select: {
+					name: true
+				}
 			}
 		}
 	})
 
 	if (!post) {
 		return res.status(401).json("Post doesn't exist")
+
 	}
-	const { author: { name: name, image: userImage }, ...rest } = post
-	res.status(200).json({ name, userImage, ...rest })
+ 	const {
+		author: { name: name, image: userImage },
+		categories: [{ name: categoryName }],
+		...rest
+	} = post
+	res.status(200).json({
+		name, userImage,
+		categoryName,
+		...rest
+	})
 
 })
 // postController.post("/")
