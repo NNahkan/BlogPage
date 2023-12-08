@@ -5,7 +5,7 @@ import dotenv from "dotenv"
 
 
 const postController = express.Router()
-dotenv.config()
+dotenv.config() 
 
 
 postController.get("/", async (req: Request, res) => {
@@ -26,6 +26,21 @@ postController.get("/", async (req: Request, res) => {
 
 
 })
+
+postController.get("/user/:id", async (req, res) => {
+	const post = await prisma.post.findUnique({
+		where: {
+			id: +req.params.id
+		},
+		include: {
+			categories: true
+		}
+
+	})
+	console.log(post)
+})
+
+
 
 postController.get("/:id", async (req, res) => {
 	const post = await prisma.post.findUnique({
@@ -51,7 +66,7 @@ postController.get("/:id", async (req, res) => {
 		return res.status(401).json("Post doesn't exist")
 
 	}
- 	const {
+	const {
 		author: { name: name, image: userImage },
 		categories: [{ name: categoryName }],
 		...rest
@@ -63,7 +78,48 @@ postController.get("/:id", async (req, res) => {
 	})
 
 })
-// postController.post("/")
+postController.post("/", async (req, res) => {
+	const token = req.cookies.access_token;
+
+	if (!token) {
+		return res.status(401).json("Not authenticated!");
+	}
+
+	const userInfo = jwt.verify(token, process.env.JWT_SECRET_KEY!) as { id: number, iat: number };
+
+	const { title, content, categoryName, image, createdAt } = req.body
+
+	try {
+		const newPost = await prisma.post.create({
+			include: {
+				categories: true
+			},
+			data: {
+				title,
+				content,
+				image,
+				createdAt,
+				authorId: userInfo.id,
+				categories: {
+					connectOrCreate: [
+						{
+							where: { name: categoryName },
+							create: { name: categoryName }
+						}
+					]
+				},
+			}
+		})
+
+
+
+		return res.status(200).json(newPost)
+	} catch (err) {
+		return res.status(500).json(err)
+	}
+})
+
+
 postController.delete("/:id", async (req: Request, res: Response) => {
 	const token = req.cookies.access_token;
 
@@ -94,7 +150,48 @@ postController.delete("/:id", async (req: Request, res: Response) => {
 		}
 	}
 });
-// postController.put("/:id")
+
+postController.put("/:id", async (req, res) => {
+	const token = req.cookies.access_token;
+
+	if (!token) {
+		return res.status(401).json("Not authenticated!");
+	}
+
+	const userInfo = jwt.verify(token, process.env.JWT_SECRET_KEY!) as { id: number, iat: number };
+	const postId = req.params.id
+	const { title, content, categoryName, image, createdAt } = req.body
+
+
+	try {
+		const updatedPost = await prisma.post.update({
+			where: {
+				id: +postId
+			},
+			include: {
+				categories: true
+			},
+			data: {
+				title,
+				content,
+				image,
+ 				categories: {
+					connectOrCreate: [
+						{
+							where: { name: categoryName },
+							create: { name: categoryName }
+						}
+					]
+				},
+			}
+
+		})
+		return res.status(200).json(updatedPost)
+	} catch (err) {
+		return res.status(500).json(err)
+	}
+})
+
 
 
 export { postController } 
